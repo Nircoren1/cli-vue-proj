@@ -1,8 +1,8 @@
 
 <template>
     <section class="header">
-        <input type="checkbox" :checked="toy.isChecked" @change="onCheck" />
-        <span>{{ toy.name }}</span>
+        <h5>{{ toy.name }} </h5>
+        <h5> {{ toy.price }}</h5>
         <router-link :to="'/toy/' + toy._id">
             <button>Details</button>
         </router-link>
@@ -18,16 +18,16 @@ import { eventBus } from '../services/event-bus.service.js'
 
 export default {
     // update props to new way of doing it.
-    props: ['toy'],
+    props: {
+        toy: {
+            type: Array,
+            required: true,
+        }
+    },
     methods: {
         onDelete() {
             this.$emit('onDelete', this.toy._id)
         },
-        onCheck() {
-            const toy = JSON.parse(JSON.stringify(this.toy))
-            toy.isChecked = !toy.isChecked
-            eventBus.emit('onCheck', toy)
-        }
     },
 }
 </script>

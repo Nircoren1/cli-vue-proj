@@ -7,11 +7,12 @@ export const toyService = {
     getById,
     remove,
     save,
-    getEmptyProduct
+    getEmptyToy,
+    getLabels,
 }
 
 const TOY_KEY = 'toysDB'
-const labels = ["On wheels", "Box game", "Art", "Baby", "Doll", "Puzzle","Outdoor"]
+const labels = ["On wheels", "Box game", "Art", "Baby", "Doll", "Puzzle", "Outdoor", 'Battery Powered']
 
 let gToys = _createToys()
 
@@ -24,16 +25,54 @@ function _createToys() {
                 "name": "Talking Doll",
                 "price": 123,
                 "labels": ["Doll", "Battery Powered", "Baby"],
-                "createdAt": 1631031801011,
-                "inStock": true
+                "createdAt": 2313,
+                "inStock": true,
+                "reviews": [
+                    {
+                        rate: 5,
+                        txt: 'amazing toy'
+                    },
+                    {
+                        rate: 5,
+                        txt: 'amazing wawa'
+                    },
+                ]
             },
             {
                 "_id": "t102",
-                "name": "Talking Doll",
-                "price": 123,
+                "name": "wawa",
+                "price": 100,
                 "labels": ["Doll", "Battery Powered", "Baby"],
-                "createdAt": 1631031801011,
-                "inStock": true
+                "createdAt": 1631031801,
+                "inStock": true,
+                "reviews": [
+                    {
+                        rate: 1,
+                        txt: 'bad toy'
+                    },
+                    {
+                        rate: 2,
+                        txt: 'awful'
+                    },
+                ]
+            },
+            {
+                "_id": "t103",
+                "name": "Doll 3",
+                "price": 20,
+                "labels": ["Doll", "Baby"],
+                "createdAt": 123321,
+                "inStock": true,
+                "reviews": [
+                    {
+                        rate: 1,
+                        txt: 'bad toy'
+                    },
+                    {
+                        rate: 2,
+                        txt: 'awful'
+                    },
+                ]
             },
 
         ]
@@ -43,8 +82,17 @@ function _createToys() {
 }
 
 
-function query() {
-    const toys = JSON.parse(JSON.stringify(gToys))
+function query(filterBy) {
+    let toys = JSON.parse(JSON.stringify(gToys))
+    toys = toys.filter(toy => {
+        return toy.name.toLowerCase().includes(filterBy.name.toLowerCase()) &&
+            filterBy.inStock ? toy.inStock : true &&
+                filterBy.labels.length ? filterBy.labels.every(label => toy.labels.includes(label)) : true
+    })
+    if (filterBy.sortBy) {
+        const sortBy = filterBy.sortBy
+        toys.sort((a, b) => a[sortBy] > b[sortBy] ? 1 : -1)
+    }
     return new Promise((resolve, reject) => {
         setTimeout(() => { resolve(toys) }, 500)
     })
@@ -83,10 +131,19 @@ function _update(toy) {
     return toy
 }
 
-function getEmptyProduct() {
+function getEmptyToy() {
     return {
         _id: '',
         name: '',
-        price: 100
+        price: 100,
+        "labels": [],
+        "createdAt": new Date().getTime(),
+        "inStock": true,
+        "reviews": []
+
     }
+}
+
+function getLabels() {
+    return Promise.resolve(labels)
 }

@@ -1,8 +1,8 @@
 
 <template>
   <section>
-    <app-header/>
-    <router-view/>
+    <app-header />
+    <router-view />
   </section>
 </template>
 
@@ -13,7 +13,11 @@ import appHeader from './cmps/app-header.vue'
 export default {
 
   name: 'app',
-  components:{
+  created() {
+    this.$store.dispatch({ type: 'loadToys' })
+
+  },
+  components: {
     appHeader
   }
 }

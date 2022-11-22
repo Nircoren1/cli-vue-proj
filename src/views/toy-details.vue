@@ -1,11 +1,18 @@
 <template>
     <header class="header" v-if="toy">
-        <h1>{{ toy.txt }}</h1>
-        <h1>{{ toy._id }}</h1>
+        <ul>
+            <li>id: {{ toy._id }}</li>
+            <li>Price: {{ toy.price }}</li>
+            <li>Labels: {{ toy.labels }}</li>
+            <li>Created at: {{ toy.createdAt }}</li>
+            <li>In Stock: {{ toy.inStock }}</li>
+        </ul>
+        <toy-reviews :toy="toy" />
     </header>
 </template>
 
 <script>
+import toyReviews from '../cmps/toy-reviews.vue'
 export default {
     data() {
         return {
@@ -19,8 +26,11 @@ export default {
         getToy() {
             const currToyId = this.$route.params.id
             this.$store.commit({ type: 'setCurrToy', id: currToyId })
-            this.toy = this.$store.state.currToy
+            this.toy = this.$store.getters.currToy
         }
     },
+    components: {
+        toyReviews,
+    }
 }
 </script>

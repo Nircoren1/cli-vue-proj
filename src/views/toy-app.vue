@@ -1,9 +1,9 @@
 
 <template>
-    <section >
-        <toy-filter />
+    <section>
+        <toy-filter @setFilter="setFilter" />
         <router-link to="/toy/edit">Add new toy</router-link>
-        <toy-list :toys="getToysForDisplay" @onDelete="onDelete" />
+        <toy-list v-if="toysForDisplay" :toys="toysForDisplay" @onDelete="onDelete" />
     </section>
 </template>
 
@@ -21,14 +21,6 @@ export default {
         }
     },
     created() {
-        this.$store.dispatch({ type: 'loadToys' })
-        //need to fix this. event bus calls itself multiple times 
-        eventBus.on('onCheck', (toy) => {
-            this.$store.dispatch({ type: 'toyChecked', toy })
-        })
-        eventBus.on('onFilter', (filterBy) => {
-            this.$store.commit({ type: 'filterToys', filterBy })
-        })
         this.prefrences = this.$store.getters.getUserPrefrences
     },
     methods: {
@@ -36,11 +28,14 @@ export default {
             this.$store.dispatch({ type: 'removeToy', toyId })
                 .then((toyId) => showSuccessMsg(`${toyId} was deleted`))
                 .catch((toyId) => showErrorMsg(`Delete failed`))
-        }
+        },
+        setFilter(filterBy) {
+            this.$store.dispatch({ type: 'setFilter', filterBy })
+        },
     },
     computed: {
-        getToysForDisplay() {
-            return this.$store.getters.getToysForDisplay
+        toysForDisplay() {            
+            return this.$store.getters.toysForDisplay
         }
     },
     components: {

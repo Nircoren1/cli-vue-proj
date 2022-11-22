@@ -1,20 +1,36 @@
 
 <template>
-    <header class="filter">
+    <section class="filter">
         <h3>filter</h3>
-        <form ref="filterForm" @submit.prevent="onFilter()">
-            <input ref="textFilter" type="text" name="textFilter" />
-            <fieldset>
-                <input type="radio" id="All" name="filteredToysType" value="All">
-                <label for="All">All</label><br>
-                <input type="radio" id="Active" name="filteredToysType" value="Active">
-                <label for="Active">Active</label><br>
-                <input type="radio" id="Done" name="filteredToysType" value="Done">
-                <label for="Done">Done</label>
-            </fieldset>
-            <button>filter</button>
-        </form>
-    </header>
+        <div>
+            <label for="">Name</label>
+            <input @input="setFilter" v-model=filterBy.name type="text" />
+        </div>
+
+        <label for="">Labels</label>
+        <select @input="setFilter" v-model="filterBy.labels" multiple>
+            <option value="On wheels">On wheels</option>
+            <option value="Box game">Box game</option>
+            <option value="Art">Art</option>
+            <option value="Baby">Baby</option>
+        </select>
+        <div>
+            <label>
+                Show only toys in stock
+                <input @input="setFilter" v-model="filterBy.inStock" type="checkbox" />
+            </label>
+        </div>
+
+        <div>
+            <label for="">Sort by:</label>
+            <select @input="setFilter" v-model="filterBy.sortBy">
+                <option value="name">Name</option>
+                <option value="price">Price</option>
+                <option value="createdAt">Date</option>
+            </select>
+        </div>
+    
+    </section>
 </template>
 
 <script>
@@ -22,13 +38,24 @@ import { eventBus } from "../services/event-bus.service.js"
 import { utilService } from '../services/util.service.js'
 
 export default {
-    created() {
-        this.onFilter = utilService.debounce(() => {
-            const textFilter = this.$refs.filterForm.textFilter.value
-            const typeFilter = this.$refs.filterForm.filteredToysType.value
-            eventBus.emit('onFilter', { textFilter, typeFilter })
-        }, 1500)
+    data() {
+        return {
+            filterBy: {
+                name: '',
+                labels: [],
+                sort: 'name',
+                inStock: false,
+                sortBy: false
+            }
+        }
     },
+    created() {
+        this.setFilter = utilService.debounce(() => {
+            const filterBy = this.filterBy
+            this.$emit('setFilter', filterBy)
+        }, 500)
+    },
+
 }
 </script>
    

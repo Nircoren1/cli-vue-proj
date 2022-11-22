@@ -1,44 +1,61 @@
-
 <template>
     <section class="header">
-        <label>Name</label>
-        <input type="text" v-model="toy.name" />
-        <button @click="save">Save</button>
+        <form v-if="toyToEdit">
+            <div>
+                <label>Name</label>
+                <input type="text" v-model="toyToEdit.name" />
+            </div>
+            <div>
+                <label for="">Price</label>
+                <input type="number" v-model="toyToEdit.price" />
+            </div>
+            <div>
+                <label for="">Labels</label>
+                <ul>
+                    <li v-for="label in labels">
+                        <input type="checkbox" :checked="isToyHasLabel(label)" @change="labelChecked(label)">
+                        <span>{{ label }}</span>
+                    </li>
+                </ul>
+            </div>
+            <div>
+                <label for="">In stock?</label>
+                <button @click="onStockBtn(true)">yes</button>
+                <button @click="onStockBtn(false)">no</button>
+            </div>
+
+            <button @click="save">Save</button>
+        </form>
+
     </section>
 </template>
-<!-- "name": "Talking Doll",
-"price": 123,
-"labels": ["Doll", "Battery Powered", "Baby"],
- "createdAt": 1631031801011,
-"inStock": true  -->
+
 <script>
 import { showErrorMsg, showSuccessMsg } from "../services/event-bus.service.js"
-
+import { toyService } from "../services/toy.service"
 export default {
     data() {
         return {
-            toy: {
-                _id: null,
-                name: '',
-                price:null,
-                labels:null,
-                inStock:null,
-            },
+            toyToEdit: null,
+            labels: null,
         }
     },
     created() {
-        this.getToy()
+        const { id } = this.$route.params
+        this.initLabels()
+        if (id) {
+            toyService.getById(id).then((toy) => {
+                this.toyToEdit = JSON.parse(JSON.stringify(toy))
+            })
+        } else this.toyToEdit = toyService.getEmptyToy()
+
     },
     methods: {
-        getToy() {
-            const currToyId = this.$route.params.id
-            if (!currToyId) return
-            this.$store.commit({ type: 'setCurrToy', id: currToyId })
-            let currToy = this.$store.getters.getCurrToy
-            this.toy = JSON.parse(JSON.stringify(currToy))
+        initLabels() {
+            toyService.getLabels().then(lables => this.labels = lables)
         },
         save() {
-            const toy = this.toy
+            const toy = this.toyToEdit
             const successMsgType = toy._id ? 'Edited' : 'Added'
             const errorMsgType = toy._id ? 'edit' : 'add'
             this.$store.dispatch({ type: 'saveToy', toy })
@@ -48,7 +65,27 @@ export default {
                 .catch((err) => {
                     showErrorMsg(`Cannot ${errorMsgType} toy`)
                 })
+        },
+        isToyHasLabel(label) {
+            return this.toyToEdit.labels.includes(label)
+        },
+        labelChecked(label) {
+            const idx = this.toyToEdit.labels.findIndex(toyLabel => toyLabel === label)
+            if (idx > -1) {
+                this.toyToEdit.labels.splice(idx, 1)
+            } else {
+                this.toyToEdit.labels.push(label)
+            }
+        },
+        onStockBtn(onStock) {
+            let bool = false
+            if (onStock) bool = true
+            this.toyToEdit.inStock = bool
         }
+
+    },
+    computed: {
+
     }
 }
 

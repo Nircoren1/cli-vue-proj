@@ -4,21 +4,22 @@ export default {
     strict: true,
     state() {
         return {
-            toys: [],
+            toys: null,
             currToy: null,
             filterBy: {
-                typelFilter: 'All',
-                textFilter: '',
+                name:'',
+                labels: [],
+                sort: 'name',
+                inStock: false,
             },
         }
     },
-
     mutations: {
         setToys(state, { toys }) {
             state.toys = toys
         },
-        filterToys(state, { filterBy }) {
-            state.filterBy = { ...filterBy }
+        setFilter(state, { filterBy }) {
+            state.filterBy = filterBy
         },
         setCurrToy(state, { id }) {
             state.currToy = state.toys.find(toy => toy._id === id)
@@ -34,33 +35,17 @@ export default {
         },
     },
     getters: {
-        getProgress({ toys }) {
-            const checkedToysCount = toys.reduce((acc, toy) => {
-                if (toy.isChecked) return acc + 1
-                else return acc
-            }, 0)
-            return checkedToysCount / toys.length * 100
-        },
-        getToysForDisplay({ toys, filterBy }) {
-            const { typeFilter, textFilter } = filterBy
-            return toys.filter(toy => {
-                let showToy = true
-                if (typeFilter === 'Done') {
-                    showToy = toy.isChecked
-                } else if (typeFilter === 'Active') {
-                    showToy = !toy.isChecked
-                }
-                return toy.name.toLowerCase().includes(textFilter.toLowerCase()) && showToy
-            })
-        },
-        getCurrToy({ currToy }) {
+        currToy({ currToy }) {
             return currToy
+        },
+        toysForDisplay({toys}){
+            return toys
         }
     },
     actions: {
-        loadToys(context) {
-            toyService.query().then(toys => {
-                context.commit({ type: 'setToys', toys })
+        loadToys({ commit, state }) {
+            toyService.query(state.filterBy).then((toys) => {
+                commit({ type: 'setToys', toys })
             })
         },
         removeToy(context, { toyId }) {
@@ -78,6 +63,10 @@ export default {
         toyChecked(context, { toy }) {
             toyService.save(toy)
                 .then(savedToy => context.commit({ type: 'saveToy', savedToy }))
+        },
+        setFilter({ commit, dispatch }, { filterBy }) {
+            commit({ type: 'setFilter', filterBy })
+            dispatch({ type: 'loadToys' })
         },
     }
 }
