@@ -1,5 +1,5 @@
 <template>
-    <section class="header">
+    <section>
         <form v-if="toyToEdit">
             <div>
                 <label>Name</label>
@@ -20,8 +20,8 @@
             </div>
             <div>
                 <label for="">In stock?</label>
-                <button @click="onStockBtn(true)">yes</button>
-                <button @click="onStockBtn(false)">no</button>
+                <button @click="inStockBtn(true)">yes</button>
+                <button @click="inStockBtn(false)">no</button>
             </div>
 
             <button @click="save">Save</button>
@@ -44,6 +44,7 @@ export default {
         const { id } = this.$route.params
         this.initLabels()
         if (id) {
+            // take it from store not from service.
             toyService.getById(id).then((toy) => {
                 this.toyToEdit = JSON.parse(JSON.stringify(toy))
             })
@@ -59,7 +60,7 @@ export default {
             const successMsgType = toy._id ? 'Edited' : 'Added'
             const errorMsgType = toy._id ? 'edit' : 'add'
             this.$store.dispatch({ type: 'saveToy', toy })
-                .then((savedtoy) => {
+                .then(() => {
                     showSuccessMsg(`${successMsgType} toy (id: ${toy._id})`)
                 })
                 .catch((err) => {
@@ -73,11 +74,10 @@ export default {
             const idx = this.toyToEdit.labels.findIndex(toyLabel => toyLabel === label)
             if (idx > -1) {
                 this.toyToEdit.labels.splice(idx, 1)
-            } else {
-                this.toyToEdit.labels.push(label)
-            }
+            } else this.toyToEdit.labels.push(label)
+
         },
-        onStockBtn(onStock) {
+        inStockBtn(onStock) {
             let bool = false
             if (onStock) bool = true
             this.toyToEdit.inStock = bool
